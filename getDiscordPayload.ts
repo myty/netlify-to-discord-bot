@@ -40,6 +40,6 @@ function buildNetlifyLink(
     case NetlifyDeploymentStatus.failure:
     case NetlifyDeploymentStatus.started:
     default:
-      return `https://app.netlify.com/sites/${payload.name}/deploys/${payload.build_id}`;
+      return `https://app.netlify.com/sites/${payload.name}/deploys/${payload.id}`;
   }
 }
