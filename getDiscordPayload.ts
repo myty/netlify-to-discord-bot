@@ -11,7 +11,7 @@ export function getDiscordPayload(
   netlifyPayload: NetlifyPayload
 ) {
   const deploymentMessage = buildDeploymentMessage(status);
-  const deploymentLink = buildNetlifyLink(status, netlifyPayload);
+  const deploymentLink = buildNetlifyBuildDetailsUrl(netlifyPayload);
 
   return {
     content: `${deploymentMessage}: ${deploymentLink}`,
@@ -30,16 +30,6 @@ function buildDeploymentMessage(status: NetlifyDeploymentStatus) {
   }
 }
 
-function buildNetlifyLink(
-  status: NetlifyDeploymentStatus,
-  payload: NetlifyPayload
-) {
-  switch (status) {
-    case NetlifyDeploymentStatus.success:
-      return payload.deploy_ssl_url;
-    case NetlifyDeploymentStatus.failure:
-    case NetlifyDeploymentStatus.started:
-    default:
-      return `https://app.netlify.com/sites/${payload.name}/deploys/${payload.id}`;
-  }
+function buildNetlifyBuildDetailsUrl(payload: NetlifyPayload) {
+  return `https://app.netlify.com/sites/${payload.name}/deploys/${payload.id}`;
 }

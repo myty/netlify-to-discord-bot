@@ -36,7 +36,7 @@ export interface NetlifyPayload {
   file_tracking_optimization: boolean;
   plugin_state: string;
   has_edge_handlers: boolean;
-  links: Links;
+  links?: Links;
   framework: null;
   entry_path: null;
   views_count: null;
@@ -44,9 +44,9 @@ export interface NetlifyPayload {
 }
 
 export interface Links {
-  permalink: string;
-  alias: string;
-  branch: null;
+  permalink?: string;
+  alias?: string;
+  branch?: null;
 }
 
 export interface LogAccessAttributes {
