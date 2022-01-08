@@ -24,6 +24,11 @@ export function getDiscordPayload(
   };
 }
 
+/**
+ * Colors returned are based on: https://gist.github.com/thomasbnt/b6f455e2c7d743b796917fa3c205f812#file-code_colors_discordjs-md
+ * @param status {NetlifyDeploymentStatus}
+ * @returns {number}
+ */
 function getDeploymentStatusColor(status: NetlifyDeploymentStatus): number {
   switch (status) {
     case NetlifyDeploymentStatus.success:
