@@ -17,6 +17,8 @@ async function handler(req: Request): Promise<Response> {
       case "POST": {
         const netlifyPayload: NetlifyPayload = await req.json();
 
+        console.log("webhook called", { deploymentStatus, netlifyPayload });
+
         const discordPayload = getDiscordPayload(
           deploymentStatus,
           netlifyPayload
