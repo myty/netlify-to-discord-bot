@@ -1,8 +1,6 @@
-import { dotEnvConfig, serve } from "./deps.ts";
+import { serve } from "./deps.ts";
 import { getDiscordPayload } from "./getDiscordPayload.ts";
 import { NetlifyPayload } from "./types.ts";
-
-dotEnvConfig({ export: true });
 
 const discordBotUrl = Deno.env.get("DISCORD_BOT");
 
