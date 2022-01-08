@@ -1,7 +1,45 @@
 import { NetlifyPayload } from "./types.ts";
 
-export function getDiscordPayload(netlifyPayload: NetlifyPayload) {
+export enum NetlifyDeploymentStatus {
+  started = "started",
+  success = "success",
+  failure = "failure",
+}
+
+export function getDiscordPayload(
+  status: NetlifyDeploymentStatus,
+  netlifyPayload: NetlifyPayload
+) {
+  const deploymentMessage = buildDeploymentMessage(status);
+  const deploymentLink = buildNetlifyLink(status, netlifyPayload);
+
   return {
-    content: `Deployed successfully: ${netlifyPayload.deploy_ssl_url}`,
+    content: `${deploymentMessage}: ${deploymentLink}`,
   };
+}
+
+function buildDeploymentMessage(status: NetlifyDeploymentStatus) {
+  switch (status) {
+    case NetlifyDeploymentStatus.success:
+      return "Deployment successful";
+    case NetlifyDeploymentStatus.failure:
+      return "Deployment failed";
+    case NetlifyDeploymentStatus.started:
+    default:
+      return "Deployment started";
+  }
+}
+
+function buildNetlifyLink(
+  status: NetlifyDeploymentStatus,
+  payload: NetlifyPayload
+) {
+  switch (status) {
+    case NetlifyDeploymentStatus.success:
+      return payload.deploy_ssl_url;
+    case NetlifyDeploymentStatus.failure:
+    case NetlifyDeploymentStatus.started:
+    default:
+      return payload.log_access_attributes.path;
+  }
 }

@@ -1,5 +1,6 @@
 import { serve } from "./deps.ts";
 import { getDiscordPayload } from "./getDiscordPayload.ts";
+import { parseDeploymentStatus } from "./parseDeploymentStatus.ts";
 import { NetlifyPayload } from "./types.ts";
 
 const discordBotUrl = Deno.env.get("DISCORD_BOT");
@@ -10,10 +11,17 @@ async function handler(req: Request): Promise<Response> {
   }
 
   try {
+    const deploymentStatus = parseDeploymentStatus(req);
+
     switch (req.method) {
       case "POST": {
         const netlifyPayload: NetlifyPayload = await req.json();
-        const discordPayload = getDiscordPayload(netlifyPayload);
+
+        const discordPayload = getDiscordPayload(
+          deploymentStatus,
+          netlifyPayload
+        );
+
         const request = new Request(discordBotUrl, {
           method: "POST",
           body: JSON.stringify(discordPayload),
@@ -32,5 +40,4 @@ async function handler(req: Request): Promise<Response> {
   return new Response("Invalid method", { status: 405 });
 }
 
-console.log("Listening on http://localhost:8000");
 serve(handler);
