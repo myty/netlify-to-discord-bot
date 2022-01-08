@@ -11,10 +11,11 @@ export function getDiscordPayload(
   netlifyPayload: NetlifyPayload
 ) {
   const deploymentMessage = buildDeploymentMessage(status);
-  const deploymentLink = buildNetlifyBuildDetailsUrl(netlifyPayload);
+  const detailsLink = buildNetlifyBuildDetailsUrl(netlifyPayload);
+  const previewLink = buildPreviewLink(netlifyPayload);
 
   return {
-    content: `${deploymentMessage}: ${deploymentLink}`,
+    content: `<b>${deploymentMessage}</b>< br />Details: ${detailsLink} ${previewLink}`,
   };
 }
 
@@ -30,6 +31,10 @@ function buildDeploymentMessage(status: NetlifyDeploymentStatus) {
   }
 }
 
-function buildNetlifyBuildDetailsUrl(payload: NetlifyPayload) {
+function buildPreviewLink(payload: NetlifyPayload) {
+  return `<br />Preview: ${payload.links?.permalink}`;
+}
+
+export function buildNetlifyBuildDetailsUrl(payload: NetlifyPayload) {
   return `https://app.netlify.com/sites/${payload.name}/deploys/${payload.id}`;
 }

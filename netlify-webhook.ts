@@ -1,5 +1,8 @@
 import { serve } from "./deps.ts";
-import { getDiscordPayload } from "./getDiscordPayload.ts";
+import {
+  buildNetlifyBuildDetailsUrl,
+  getDiscordPayload,
+} from "./getDiscordPayload.ts";
 import { parseDeploymentStatus } from "./parseDeploymentStatus.ts";
 import { NetlifyPayload } from "./types.ts";
 
@@ -17,7 +20,15 @@ async function handler(req: Request): Promise<Response> {
       case "POST": {
         const netlifyPayload: NetlifyPayload = await req.json();
 
-        console.log("webhook called", { deploymentStatus, netlifyPayload });
+        console.log("Webhook called.", {
+          deploymentStatus,
+          netlifyPayload: {
+            id: netlifyPayload.id,
+            name: netlifyPayload.name,
+            permalink: netlifyPayload.links?.permalink,
+            detailsLink: buildNetlifyBuildDetailsUrl(netlifyPayload),
+          },
+        });
 
         const discordPayload = getDiscordPayload(
           deploymentStatus,
