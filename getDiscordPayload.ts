@@ -40,6 +40,6 @@ function buildNetlifyLink(
     case NetlifyDeploymentStatus.failure:
     case NetlifyDeploymentStatus.started:
     default:
-      return payload.log_access_attributes.url;
+      return `https://app.netlify.com/sites/${payload.name}/deploys/${payload.build_id}`;
   }
 }
