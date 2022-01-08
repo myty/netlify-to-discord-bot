@@ -40,6 +40,6 @@ function buildNetlifyLink(
     case NetlifyDeploymentStatus.failure:
     case NetlifyDeploymentStatus.started:
     default:
-      return payload.log_access_attributes.path;
+      return payload.log_access_attributes.url;
   }
 }
