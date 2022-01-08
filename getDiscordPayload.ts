@@ -10,13 +10,31 @@ export function getDiscordPayload(
   status: NetlifyDeploymentStatus,
   netlifyPayload: NetlifyPayload
 ) {
-  const deploymentMessage = buildDeploymentMessage(status);
-  const detailsLink = buildNetlifyBuildDetailsUrl(netlifyPayload);
-  const previewLink = buildPreviewLink(netlifyPayload);
-
   return {
-    content: `<b>${deploymentMessage}</b>< br />Details: ${detailsLink} ${previewLink}`,
+    embeds: [
+      {
+        title: buildDeploymentMessage(status),
+        color: getDeploymentStatusColor(status),
+        fields: [
+          ...buildNetlifyBuildDetails(netlifyPayload),
+          ...buildPreviewLink(status, netlifyPayload),
+        ],
+      },
+    ],
   };
+}
+
+function getDeploymentStatusColor(status: NetlifyDeploymentStatus): number {
+  switch (status) {
+    case NetlifyDeploymentStatus.success:
+      return 3066993;
+    case NetlifyDeploymentStatus.failure:
+      return 15158332;
+    case NetlifyDeploymentStatus.started:
+      return 3447003;
+    default:
+      return 0;
+  }
 }
 
 function buildDeploymentMessage(status: NetlifyDeploymentStatus) {
@@ -31,10 +49,32 @@ function buildDeploymentMessage(status: NetlifyDeploymentStatus) {
   }
 }
 
-function buildPreviewLink(payload: NetlifyPayload) {
-  return `<br />Preview: ${payload.links?.permalink}`;
+function buildPreviewLink(
+  status: NetlifyDeploymentStatus,
+  payload: NetlifyPayload
+) {
+  if (
+    status != NetlifyDeploymentStatus.success ||
+    payload.links?.permalink == null
+  ) {
+    return [];
+  }
+
+  return [
+    {
+      name: "Preview",
+      value: payload.links?.permalink,
+      inline: false,
+    },
+  ];
 }
 
-export function buildNetlifyBuildDetailsUrl(payload: NetlifyPayload) {
-  return `https://app.netlify.com/sites/${payload.name}/deploys/${payload.id}`;
+export function buildNetlifyBuildDetails(payload: NetlifyPayload) {
+  return [
+    {
+      name: "Details",
+      value: `https://app.netlify.com/sites/${payload.name}/deploys/${payload.id}`,
+      inline: false,
+    },
+  ];
 }

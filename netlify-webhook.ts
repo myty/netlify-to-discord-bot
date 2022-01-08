@@ -1,6 +1,6 @@
 import { serve } from "./deps.ts";
 import {
-  buildNetlifyBuildDetailsUrl,
+  buildNetlifyBuildDetails,
   getDiscordPayload,
 } from "./getDiscordPayload.ts";
 import { parseDeploymentStatus } from "./parseDeploymentStatus.ts";
@@ -26,7 +26,7 @@ async function handler(req: Request): Promise<Response> {
             id: netlifyPayload.id,
             name: netlifyPayload.name,
             permalink: netlifyPayload.links?.permalink,
-            detailsLink: buildNetlifyBuildDetailsUrl(netlifyPayload),
+            detailsLink: buildNetlifyBuildDetails(netlifyPayload),
           },
         });
 
