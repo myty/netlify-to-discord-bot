@@ -43,6 +43,10 @@ async function handler(req: Request): Promise<Response> {
           },
         });
 
+        console.log("Called Discord", {
+          discordPayload,
+        });
+
         return await fetch(request);
       }
     }

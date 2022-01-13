@@ -11,12 +11,21 @@ export function getDiscordPayload(
   netlifyPayload: NetlifyPayload
 ) {
   return {
+    ...getEmbeds(status, netlifyPayload),
+    ...getComponents(),
+  };
+}
+
+function getEmbeds(
+  status: NetlifyDeploymentStatus,
+  netlifyPayload: NetlifyPayload
+) {
+  return {
     embeds: [
       {
         title: buildDeploymentMessage(status),
         color: getDeploymentStatusColor(status),
         ...getFields(status, netlifyPayload),
-        ...getComponents(),
       },
     ],
   };
@@ -42,9 +51,9 @@ function getComponents() {
         components: [
           {
             type: 2,
-            label: "Deploy",
+            label: "Publish",
             style: 1,
-            custom_id: "deploy",
+            custom_id: "publish_deployment",
           },
         ],
       },
