@@ -1,17 +1,30 @@
 import { NetlifyPayload } from "./types.ts";
 
 export enum NetlifyDeploymentStatus {
-  started = "started",
-  success = "success",
-  failure = "failure",
+  Started = "started",
+  Success = "success",
+  Failure = "failure",
+}
+
+export function isValidNetlifyDeploymentStatus(
+  status: string
+): status is NetlifyDeploymentStatus {
+  return Object.values(NetlifyDeploymentStatus)
+    .map((key) => key as string)
+    .includes(status);
 }
 
 export function getDiscordPayload(
   status: NetlifyDeploymentStatus,
   netlifyPayload: NetlifyPayload
 ) {
+  const discordApplicationId = Deno.env.get("DISCORD_APPLICATION_ID");
+  if (discordApplicationId == null) {
+    throw Error("'DISCORD_APPLICATION_ID' is not defined");
+  }
+
   return {
-    application_id: "845027738276462632",
+    application_id: discordApplicationId,
     channel_id: "772908445358620702",
     tts: false,
     ...getEmbeds(status, netlifyPayload),
@@ -47,7 +60,7 @@ function getFields(
 }
 
 function getComponents(status: NetlifyDeploymentStatus) {
-  if (status !== NetlifyDeploymentStatus.success) {
+  if (status !== NetlifyDeploymentStatus.Success) {
     return {};
   }
 
@@ -76,11 +89,11 @@ function getComponents(status: NetlifyDeploymentStatus) {
  */
 function getDeploymentStatusColor(status: NetlifyDeploymentStatus): number {
   switch (status) {
-    case NetlifyDeploymentStatus.success:
+    case NetlifyDeploymentStatus.Success:
       return 3066993;
-    case NetlifyDeploymentStatus.failure:
+    case NetlifyDeploymentStatus.Failure:
       return 15158332;
-    case NetlifyDeploymentStatus.started:
+    case NetlifyDeploymentStatus.Started:
       return 3447003;
     default:
       return 0;
@@ -89,13 +102,13 @@ function getDeploymentStatusColor(status: NetlifyDeploymentStatus): number {
 
 function buildDeploymentMessage(status: NetlifyDeploymentStatus) {
   switch (status) {
-    case NetlifyDeploymentStatus.success:
-      return "Deployment successful";
-    case NetlifyDeploymentStatus.failure:
-      return "Deployment failed";
-    case NetlifyDeploymentStatus.started:
+    case NetlifyDeploymentStatus.Success:
+      return "Deployment Successful";
+    case NetlifyDeploymentStatus.Failure:
+      return "Deployment Failed";
+    case NetlifyDeploymentStatus.Started:
     default:
-      return "Deployment started";
+      return "Deployment Started";
   }
 }
 
@@ -104,7 +117,7 @@ function buildPreviewLink(
   payload: NetlifyPayload
 ) {
   if (
-    status != NetlifyDeploymentStatus.success ||
+    status != NetlifyDeploymentStatus.Success ||
     payload.links?.permalink == null
   ) {
     return [];
