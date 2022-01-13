@@ -15,9 +15,37 @@ export function getDiscordPayload(
       {
         title: buildDeploymentMessage(status),
         color: getDeploymentStatusColor(status),
-        fields: [
-          ...buildNetlifyBuildDetails(netlifyPayload),
-          ...buildPreviewLink(status, netlifyPayload),
+        ...getFields(status, netlifyPayload),
+        ...getComponents(),
+      },
+    ],
+  };
+}
+
+function getFields(
+  status: NetlifyDeploymentStatus,
+  netlifyPayload: NetlifyPayload
+) {
+  return {
+    fields: [
+      ...buildNetlifyBuildDetails(netlifyPayload),
+      ...buildPreviewLink(status, netlifyPayload),
+    ],
+  };
+}
+
+function getComponents() {
+  return {
+    components: [
+      {
+        type: 1,
+        components: [
+          {
+            type: 2,
+            label: "Deploy",
+            style: 1,
+            custom_id: "deploy",
+          },
         ],
       },
     ],
