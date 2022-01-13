@@ -12,7 +12,7 @@ export function getDiscordPayload(
 ) {
   return {
     ...getEmbeds(status, netlifyPayload),
-    ...getComponents(),
+    ...getComponents(status),
   };
 }
 
@@ -43,17 +43,22 @@ function getFields(
   };
 }
 
-function getComponents() {
+function getComponents(status: NetlifyDeploymentStatus) {
+  if (status !== NetlifyDeploymentStatus.success) {
+    return {};
+  }
+
   return {
     components: [
       {
         type: 1,
         components: [
           {
-            type: 2,
-            label: "Publish",
             style: 1,
-            custom_id: "publish_deployment",
+            label: `Publish`,
+            custom_id: `publish_deployment`,
+            disabled: false,
+            type: 2,
           },
         ],
       },
