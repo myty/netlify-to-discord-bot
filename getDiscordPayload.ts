@@ -11,6 +11,9 @@ export function getDiscordPayload(
   netlifyPayload: NetlifyPayload
 ) {
   return {
+    application_id: "845027738276462632",
+    channel_id: "772908445358620702",
+    tts: false,
     ...getEmbeds(status, netlifyPayload),
     ...getComponents(status),
   };

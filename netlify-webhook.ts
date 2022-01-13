@@ -20,7 +20,7 @@ async function handler(req: Request): Promise<Response> {
       case "POST": {
         const netlifyPayload: NetlifyPayload = await req.json();
 
-        console.log("Webhook called.", {
+        console.log("Webhook called", {
           deploymentStatus,
           netlifyPayload: {
             id: netlifyPayload.id,
