@@ -1,10 +1,5 @@
-import { NetlifyPayload } from "./types.ts";
-
-export enum NetlifyDeploymentStatus {
-  Started = "started",
-  Success = "success",
-  Failure = "failure",
-}
+import { NetlifyDeploymentStatus } from "../netlify/enums/netlify-deployment-status.ts";
+import { NetlifyPayload } from "../netlify/interfaces/netlify-payload.ts";
 
 export function isValidNetlifyDeploymentStatus(
   status: string

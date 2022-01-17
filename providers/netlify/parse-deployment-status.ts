@@ -1,7 +1,5 @@
-import {
-  isValidNetlifyDeploymentStatus,
-  NetlifyDeploymentStatus,
-} from "./getDiscordPayload.ts";
+import { isValidNetlifyDeploymentStatus } from "../discord/get-discord-payload.ts";
+import { NetlifyDeploymentStatus } from "./enums/netlify-deployment-status.ts";
 
 export function parseDeploymentStatus(req: Request): NetlifyDeploymentStatus {
   const urlSplit = req.url.split("/");

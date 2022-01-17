@@ -1,6 +1,3 @@
-import { serve } from "./deps.ts";
-import { buildHandler } from "./netlify-webhook.ts";
+import { serve } from "./netlify-webhook.ts";
 
-const handler = buildHandler();
-
-serve(handler);
+serve({ port: 80 });
