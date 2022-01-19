@@ -8,12 +8,12 @@ export interface ImmutableWith<T> {
 }
 
 export type ImmutableConstructor<T> = new (
-  value?: Partial<Immutable<T>>
+  value?: Partial<Immutable<T>>,
 ) => Immutable<T> & ImmutableWith<T>;
 
 export function ImmutableRecord<T>(
   defaultValues: T | Immutable<T>,
-  processor?: (values: Partial<Immutable<T>>) => Partial<Immutable<T>>
+  processor?: (values: Partial<Immutable<T>>) => Partial<Immutable<T>>,
 ) {
   const classProcessor = processor ?? ((value: Partial<Immutable<T>>) => value);
 
@@ -28,7 +28,7 @@ export function ImmutableRecord<T>(
             ...defaultValues,
             ...values,
           },
-        })
+        }),
       );
     }
 
@@ -36,8 +36,9 @@ export function ImmutableRecord<T>(
      * Returns a new object with updated values
      */
     with(values: Partial<Immutable<T>>): this {
-      return produce(this, (prev) =>
-        Object.assign(prev, classProcessor(values))
+      return produce(
+        this,
+        (prev) => Object.assign(prev, classProcessor(values)),
       );
     }
   }

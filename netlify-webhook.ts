@@ -25,7 +25,7 @@ export function serve(options?: ServeOptions): void {
         discordApplicationId: Deno.env.get("DISCORD_APPLICATION_ID"),
         discordBotUrl: Deno.env.get("DISCORD_BOT"),
         logger,
-      })
+      }),
     );
 
     app.use(router.routes());

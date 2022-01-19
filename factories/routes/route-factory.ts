@@ -3,10 +3,10 @@ import { RouteFactory } from "./types.ts";
 
 export function routeFactory<
   TFactoryOptions = unknown,
-  TRoutePath extends string = string
+  TRoutePath extends string = string,
 >(
   path: TRoutePath,
-  middlewareFactory: (options: TFactoryOptions) => RouterMiddleware<TRoutePath>
+  middlewareFactory: (options: TFactoryOptions) => RouterMiddleware<TRoutePath>,
 ): RouteFactory<TRoutePath, TFactoryOptions> {
   return (options) => [path, middlewareFactory(options)];
 }

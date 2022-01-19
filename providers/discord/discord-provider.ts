@@ -1,5 +1,5 @@
-import DiscordBotPayloadRecord from "../../models/discord/discord-payload.ts";
-import { NetlifyDeploymentStatus } from "../netlify/enums/netlify-deployment-status.ts";
+import DiscordBotPayloadRecord from "../../models/discord/discord-bot-payload.ts";
+import { NetlifyDeploymentStatus } from "../../enums/netlify-deployment-status.ts";
 import { NetlifyPayload } from "../netlify/interfaces/netlify-payload.ts";
 
 export class DiscordProvider {
@@ -7,7 +7,7 @@ export class DiscordProvider {
 
   public createBotPayload(
     deploymentStatus: NetlifyDeploymentStatus,
-    netlifyPayload: NetlifyPayload
+    netlifyPayload: NetlifyPayload,
   ): DiscordBotPayloadRecord {
     const payload = new DiscordBotPayloadRecord()
       .withApplicationId(this.discordApplicationId)

@@ -6,10 +6,10 @@ import {
 
 export type RouteFactory<
   TRoutePath extends string,
-  TRouteFactoryOptions = unknown
+  TRouteFactoryOptions = unknown,
 > = <
   P extends RouteParams<TRoutePath> = RouteParams<TRoutePath>,
-  S extends State = Record<string, unknown>
+  S extends State = Record<string, unknown>,
 >(
-  options: TRouteFactoryOptions
+  options: TRouteFactoryOptions,
 ) => [TRoutePath, RouterMiddleware<TRoutePath, P, S>];

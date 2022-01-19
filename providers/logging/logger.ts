@@ -3,7 +3,7 @@ import { Logger } from "./interfaces/logger.ts";
 function createLogger(
   prefix: string,
   logFunction: (...data: unknown[]) => void,
-  defaultMessage?: string
+  defaultMessage?: string,
 ) {
   return (...data: unknown[]) => {
     if (data.length > 0 && typeof data[0] === "string") {
