@@ -2,6 +2,7 @@ import { Application, Router } from "./deps.ts";
 import { logger as defaultLogger } from "./providers/logging/logger.ts";
 import { Logger } from "./providers/logging/interfaces/logger.ts";
 import { deploymentStatusRouteFactory } from "./factories/routes/deployment-status-route-factory.ts";
+import { DiscordProvider } from "./providers/discord/discord-provider.ts";
 
 interface ServeOptions {
   logger?: Logger;
@@ -12,6 +13,11 @@ export function serve(options?: ServeOptions): void {
   const { logger = defaultLogger, port = 8000 } = options ?? {};
 
   try {
+    const discordProvider = new DiscordProvider({
+      discordApplicationId: Deno.env.get("DISCORD_APPLICATION_ID"),
+      discordBotUrl: Deno.env.get("DISCORD_BOT"),
+    });
+
     const app = new Application();
 
     app.addEventListener("error", (event) => {
@@ -22,8 +28,7 @@ export function serve(options?: ServeOptions): void {
 
     router.post(
       ...deploymentStatusRouteFactory({
-        discordApplicationId: Deno.env.get("DISCORD_APPLICATION_ID"),
-        discordBotUrl: Deno.env.get("DISCORD_BOT"),
+        discordProvider,
         logger,
       }),
     );

@@ -1,29 +1,57 @@
-import DiscordBotPayloadRecord from "../../models/discord/discord-bot-payload.ts";
 import { NetlifyDeploymentStatus } from "../../enums/netlify-deployment-status.ts";
 import { NetlifyPayload } from "../netlify/interfaces/netlify-payload.ts";
+import { DiscordFactory } from "../../factories/discord/discord-factory.ts";
+import { Logger } from "../logging/interfaces/logger.ts";
+import { loggerFactory } from "../logging/logger.ts";
+
+interface DiscordProviderOptions {
+  discordApplicationId: string;
+  discordBotUrl: string;
+}
 
 export class DiscordProvider {
-  constructor(private discordApplicationId: string) {}
+  private discordApplicationId: string;
+  private discordBotUrl: string;
+  private logger: Logger;
 
-  public createBotPayload(
-    deploymentStatus: NetlifyDeploymentStatus,
-    netlifyPayload: NetlifyPayload,
-  ): DiscordBotPayloadRecord {
-    const payload = new DiscordBotPayloadRecord()
-      .withApplicationId(this.discordApplicationId)
-      .withChannelId("772908445358620702")
-      .addEmbedsFromNetlifyPayload(deploymentStatus, netlifyPayload);
-
-    if (deploymentStatus !== NetlifyDeploymentStatus.Success) {
-      return payload;
+  constructor(
+    options: Partial<DiscordProviderOptions> = {},
+  ) {
+    if (options.discordBotUrl == null) {
+      throw new Error("'DISCORD_BOT' is not defined");
     }
 
-    return payload.addActionComponent({
-      style: 1,
-      label: `Publish`,
-      custom_id: `publish_deployment`,
-      disabled: false,
-      type: 2,
+    if (options.discordApplicationId == null) {
+      throw Error("'DISCORD_APPLICATION_ID' is not defined");
+    }
+
+    this.discordApplicationId = options.discordApplicationId;
+    this.discordBotUrl = options.discordBotUrl;
+    this.logger = loggerFactory(this.constructor.name);
+  }
+
+  async notify(
+    deploymentStatus: NetlifyDeploymentStatus,
+    netlifyPayload: NetlifyPayload,
+  ): Promise<number> {
+    const discordPayload = DiscordFactory.createBotPayload(
+      this.discordApplicationId,
+      deploymentStatus,
+      netlifyPayload,
+    );
+
+    const request = new Request(this.discordBotUrl, {
+      method: "POST",
+      body: JSON.stringify(discordPayload),
+      headers: {
+        "content-type": "application/json",
+      },
     });
+
+    this.logger.log("notify", {
+      discordPayload,
+    });
+
+    return (await fetch(request)).status;
   }
 }

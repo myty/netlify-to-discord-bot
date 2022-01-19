@@ -6,8 +6,7 @@ import { DiscordProvider } from "../../providers/discord/discord-provider.ts";
 import { NetlifyProvider } from "../../providers/netlify/netlify-provider.ts";
 
 interface DeploymentStatusRouteFactoryOptions {
-  discordApplicationId?: string;
-  discordBotUrl?: string;
+  discordProvider: DiscordProvider;
   logger?: Logger;
 }
 
@@ -15,17 +14,7 @@ export const deploymentStatusRouteFactory = routeFactory<
   DeploymentStatusRouteFactoryOptions
 >(
   "/deployments/:status",
-  ({ discordApplicationId, discordBotUrl, logger = defaultLogger }) => {
-    if (discordBotUrl == null) {
-      throw new Error("'DISCORD_BOT' is not defined");
-    }
-
-    if (discordApplicationId == null) {
-      throw Error("'DISCORD_APPLICATION_ID' is not defined");
-    }
-
-    const discordProvider = new DiscordProvider(discordApplicationId);
-
+  ({ discordProvider, logger = defaultLogger }) => {
     return async (ctx) => {
       if (
         !NetlifyProvider.isValidNetlifyDeploymentStatus(ctx.params.status)
@@ -49,24 +38,10 @@ export const deploymentStatusRouteFactory = routeFactory<
         },
       });
 
-      const discordPayload = discordProvider.createBotPayload(
+      ctx.response.status = await discordProvider.notify(
         deploymentStatus,
         netlifyPayload,
       );
-
-      const request = new Request(discordBotUrl!, {
-        method: "POST",
-        body: JSON.stringify(discordPayload),
-        headers: {
-          "content-type": "application/json",
-        },
-      });
-
-      logger.log("Called Discord", {
-        discordPayload,
-      });
-
-      ctx.response.status = (await fetch(request)).status;
     };
   },
 );
