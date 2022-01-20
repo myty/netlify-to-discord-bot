@@ -1,8 +1,10 @@
-import { NetlifyDeploymentStatus } from "../../enums/netlify-deployment-status.ts";
-import { NetlifyPayload } from "../netlify/interfaces/netlify-payload.ts";
-import { DiscordFactory } from "../../factories/discord/discord-factory.ts";
-import { Logger } from "../logging/interfaces/logger.ts";
-import { loggerFactory } from "../logging/logger.ts";
+import { NetlifyDeploymentStatus } from "../enums/netlify-deployment-status.ts";
+import {
+  LoggingProvider,
+  LoggingProviderInterface,
+} from "./logging-provider.ts";
+import { NetlifyPayload } from "./netlify/interfaces/netlify-payload.ts";
+import { DiscordFactory } from "../factories/discord/discord-factory.ts";
 
 interface DiscordProviderOptions {
   discordApplicationId: string;
@@ -12,7 +14,7 @@ interface DiscordProviderOptions {
 export class DiscordProvider {
   private discordApplicationId: string;
   private discordBotUrl: string;
-  private logger: Logger;
+  private logger: LoggingProviderInterface;
 
   constructor(
     options: Partial<DiscordProviderOptions> = {},
@@ -27,7 +29,7 @@ export class DiscordProvider {
 
     this.discordApplicationId = options.discordApplicationId;
     this.discordBotUrl = options.discordBotUrl;
-    this.logger = loggerFactory(this.constructor.name);
+    this.logger = LoggingProvider(this.constructor.name);
   }
 
   async notify(

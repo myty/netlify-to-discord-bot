@@ -1,4 +1,16 @@
-import { Logger } from "./interfaces/logger.ts";
+export interface LoggingProviderInterface {
+  error(...data: unknown[]): void;
+  error(message: string, ...data: unknown[]): void;
+  log(...data: unknown[]): void;
+  log(message: string, ...data: unknown[]): void;
+}
+
+export const LoggingProvider = (prefix: string): LoggingProviderInterface => ({
+  log: createLogger(prefix, console.log),
+  error: createLogger(prefix, console.error, "Error"),
+});
+
+export const DefaultLogger = LoggingProvider("default");
 
 function createLogger(
   prefix: string,
@@ -22,10 +34,3 @@ function generateLogMessage(prefix: string, message?: string) {
 
   return `[${prefix}] ${message}`;
 }
-
-export const loggerFactory = (prefix: string): Logger => ({
-  log: createLogger(prefix, console.log),
-  error: createLogger(prefix, console.error, "Error"),
-});
-
-export const logger = loggerFactory("default");
