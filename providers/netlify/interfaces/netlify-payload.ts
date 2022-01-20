@@ -1,0 +1,48 @@
+import { Links } from "./links.ts";
+import { LogAccessAttributes } from "./log-access-attributes.ts";
+import { SiteCapabilities } from "./site-capabilities.ts";
+
+export interface NetlifyPayload {
+  id: string;
+  site_id: string;
+  build_id: string;
+  state: string;
+  name: string;
+  url: string;
+  ssl_url: string;
+  admin_url: string;
+  deploy_url: string;
+  deploy_ssl_url: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  error_message: null;
+  required: unknown[];
+  required_functions: null;
+  commit_ref: null;
+  review_id: null;
+  branch: string;
+  commit_url: null;
+  skipped: null;
+  locked: null;
+  log_access_attributes: LogAccessAttributes;
+  title: null;
+  review_url: null;
+  published_at: null;
+  context: string;
+  deploy_time: null;
+  available_functions: unknown[];
+  screenshot_url: null;
+  site_capabilities: SiteCapabilities;
+  committer: null;
+  skipped_log: null;
+  manual_deploy: boolean;
+  file_tracking_optimization: boolean;
+  plugin_state: string;
+  has_edge_handlers: boolean;
+  links?: Links;
+  framework: null;
+  entry_path: null;
+  views_count: null;
+  function_schedules: unknown[];
+}

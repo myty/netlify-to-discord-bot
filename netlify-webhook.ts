@@ -1,60 +1,49 @@
+import { Application, Router } from "./deps.ts";
 import {
-  buildNetlifyBuildDetails,
-  getDiscordPayload,
-} from "./getDiscordPayload.ts";
-import { parseDeploymentStatus } from "./parseDeploymentStatus.ts";
-import { NetlifyPayload } from "./types.ts";
+  DefaultLogger,
+  LoggingProviderInterface,
+} from "./providers/logging-provider.ts";
+import { deploymentStatusRouteFactory } from "./factories/routes/deployment-status-route-factory.ts";
+import { DiscordProvider } from "./providers/discord-provider.ts";
+import { NetlifyProvider } from "./providers/netlify/netlify-provider.ts";
 
-export function buildHandler() {
-  const discordBotUrl = Deno.env.get("DISCORD_BOT");
+interface ServeOptions {
+  logger?: LoggingProviderInterface;
+  port?: number;
+}
 
-  return async function handler(req: Request): Promise<Response> {
-    if (discordBotUrl == null) {
-      return new Response("'DISCORD_BOT' is not defined", { status: 405 });
-    }
+export function serve(options?: ServeOptions): void {
+  const { logger = DefaultLogger, port = 8000 } = options ?? {};
 
-    try {
-      const deploymentStatus = parseDeploymentStatus(req);
+  try {
+    const discordProvider = new DiscordProvider({
+      discordApplicationId: Deno.env.get("DISCORD_APPLICATION_ID"),
+      discordBotUrl: Deno.env.get("DISCORD_BOT"),
+    });
 
-      switch (req.method) {
-        case "POST": {
-          const netlifyPayload: NetlifyPayload = await req.json();
+    const netlifyProvider = new NetlifyProvider();
 
-          console.log("Webhook called", {
-            deploymentStatus,
-            netlifyPayload: {
-              id: netlifyPayload.id,
-              name: netlifyPayload.name,
-              permalink: netlifyPayload.links?.permalink,
-              detailsLink: buildNetlifyBuildDetails(netlifyPayload),
-            },
-          });
+    const app = new Application();
 
-          const discordPayload = getDiscordPayload(
-            deploymentStatus,
-            netlifyPayload
-          );
+    app.addEventListener("error", (event) => {
+      logger.error(event.error);
+    });
 
-          const request = new Request(discordBotUrl, {
-            method: "POST",
-            body: JSON.stringify(discordPayload),
-            headers: {
-              "content-type": "application/json",
-            },
-          });
+    const router = new Router();
 
-          console.log("Called Discord", {
-            discordPayload,
-          });
+    router.post(
+      ...deploymentStatusRouteFactory({
+        discordProvider,
+        netlifyProvider,
+      }),
+    );
 
-          return await fetch(request);
-        }
-      }
-    } catch (error: unknown) {
-      console.error(error);
-      return new Response("Application Error", { status: 500 });
-    }
+    app.use(router.routes());
 
-    return new Response("Invalid method", { status: 405 });
-  };
+    logger.log(`Listening on port ${port}`);
+
+    app.listen({ port });
+  } catch (error) {
+    logger.error(error);
+  }
 }

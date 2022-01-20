@@ -1,0 +1,1 @@
+deno run --allow-net=:8000,discord.com --allow-env --allow-read --watch .\netlify-webhook.local.ts

@@ -1,5 +1,11 @@
 {
-    "deno.enable": true,
-    "deno.lint": true,
-    "deno.unstable": true
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": true,
+  "deno.suggest.autoImports": true,
+  "prettier.enable": false,
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  }
 }
