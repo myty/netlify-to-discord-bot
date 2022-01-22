@@ -4,13 +4,12 @@ import { NetlifyPayload } from "../../providers/netlify/interfaces/netlify-paylo
 
 export const DiscordFactory = {
   createBotPayload(
-    discordApplicationId: string,
+    applicationId: string | undefined,
     deploymentStatus: NetlifyDeploymentStatus,
     netlifyPayload: NetlifyPayload,
   ): DiscordBotPayloadRecord {
     const payload = new DiscordBotPayloadRecord()
-      .withApplicationId(discordApplicationId)
-      .withChannelId("772908445358620702")
+      .withApplicationId(applicationId)
       .addEmbedsFromNetlifyPayload(deploymentStatus, netlifyPayload);
 
     if (deploymentStatus !== NetlifyDeploymentStatus.Success) {

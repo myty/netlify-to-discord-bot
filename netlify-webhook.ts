@@ -3,9 +3,14 @@ import {
   DefaultLogger,
   LoggingProviderInterface,
 } from "./providers/logging-provider.ts";
-import { deploymentStatusRouteFactory } from "./factories/routes/deployment-status-route-factory.ts";
 import { DiscordProvider } from "./providers/discord-provider.ts";
 import { NetlifyProvider } from "./providers/netlify/netlify-provider.ts";
+import { Mediator } from "./mediator/mediator.ts";
+import {
+  SendNetlifyBuildNotificationRequest,
+  SendNetlifyBuildNotificationRequestHandler,
+} from "./mediator/requests/send-netlify-build-notification-request.ts";
+import { deploymentStatusRouteFactory } from "./factories/routes/deployment-status-route-factory.ts";
 
 interface ServeOptions {
   logger?: LoggingProviderInterface;
@@ -23,6 +28,15 @@ export function serve(options?: ServeOptions): void {
 
     const netlifyProvider = new NetlifyProvider();
 
+    const mediator = new Mediator();
+    mediator.use(
+      SendNetlifyBuildNotificationRequest,
+      SendNetlifyBuildNotificationRequestHandler({
+        discordProvider,
+        netlifyProvider,
+      }),
+    );
+
     const app = new Application();
 
     app.addEventListener("error", (event) => {
@@ -32,10 +46,7 @@ export function serve(options?: ServeOptions): void {
     const router = new Router();
 
     router.post(
-      ...deploymentStatusRouteFactory({
-        discordProvider,
-        netlifyProvider,
-      }),
+      ...deploymentStatusRouteFactory({ mediator }),
     );
 
     app.use(router.routes());

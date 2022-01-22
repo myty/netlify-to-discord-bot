@@ -17,8 +17,8 @@ interface DiscordBotEmbed {
 }
 
 export interface DiscordBotPayload {
-  application_id: string;
-  channel_id: string;
+  application_id?: string;
+  channel_id?: string;
   tts: boolean;
   embeds: DiscordBotEmbed[];
   components: {
@@ -34,8 +34,6 @@ export interface DiscordBotPayload {
 }
 
 const defaultValues: DiscordBotPayload = {
-  application_id: "",
-  channel_id: "",
   tts: false,
   embeds: [],
   components: [],
@@ -45,11 +43,19 @@ export default class DiscordBotPayloadRecord
   extends ImmutableRecord<DiscordBotPayload>(
     defaultValues,
   ) {
-  withApplicationId(id: string): this {
+  withApplicationId(id?: string | null): this {
+    if (id == null) {
+      return this;
+    }
+
     return this.with({ application_id: id });
   }
 
-  withChannelId(id: string): this {
+  withChannelId(id?: string | null): this {
+    if (id == null) {
+      return this;
+    }
+
     return this.with({ channel_id: id });
   }
 

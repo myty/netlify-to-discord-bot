@@ -1,31 +1,31 @@
+import { Mediator } from "../../mediator/mediator.ts";
+import { SendNetlifyBuildNotificationRequest } from "../../mediator/requests/send-netlify-build-notification-request.ts";
 import { routeFactory } from "./route-factory.ts";
-import { DiscordProvider } from "../../providers/discord-provider.ts";
-import { NetlifyProvider } from "../../providers/netlify/netlify-provider.ts";
 
 interface DeploymentStatusRouteFactoryOptions {
-  discordProvider: DiscordProvider;
-  netlifyProvider: NetlifyProvider;
+  mediator: Mediator;
 }
 
 export const deploymentStatusRouteFactory = routeFactory<
   DeploymentStatusRouteFactoryOptions
 >(
   "/deployments/:status",
-  ({ discordProvider, netlifyProvider }) => {
+  ({ mediator }) => {
     return async (ctx) => {
-      const { deploymentStatus, netlifyPayload } = await netlifyProvider
-        .parseWebhookPayload(ctx.params.status, async () => {
+      const request = new SendNetlifyBuildNotificationRequest(
+        ctx.params.status,
+        async () => {
           const { value: netlifyPayloadPromise } = ctx.request.body({
             type: "json",
           });
 
           return await netlifyPayloadPromise;
-        });
-
-      ctx.response.status = await discordProvider.notify(
-        deploymentStatus,
-        netlifyPayload,
+        },
       );
+
+      const response = await mediator.send(request);
+
+      ctx.response.status = response;
     };
   },
 );

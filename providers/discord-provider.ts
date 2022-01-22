@@ -12,9 +12,9 @@ interface DiscordProviderOptions {
 }
 
 export class DiscordProvider {
-  private discordApplicationId: string;
-  private discordBotUrl: string;
-  private logger: LoggingProviderInterface;
+  #discordApplicationId?: string;
+  #discordBotUrl: string;
+  #logger: LoggingProviderInterface;
 
   constructor(
     options: Partial<DiscordProviderOptions> = {},
@@ -23,13 +23,9 @@ export class DiscordProvider {
       throw new Error("'DISCORD_BOT' is not defined");
     }
 
-    if (options.discordApplicationId == null) {
-      throw Error("'DISCORD_APPLICATION_ID' is not defined");
-    }
-
-    this.discordApplicationId = options.discordApplicationId;
-    this.discordBotUrl = options.discordBotUrl;
-    this.logger = LoggingProvider(this.constructor.name);
+    this.#discordApplicationId = options.discordApplicationId;
+    this.#discordBotUrl = options.discordBotUrl;
+    this.#logger = LoggingProvider(this.constructor.name);
   }
 
   async notify(
@@ -37,12 +33,12 @@ export class DiscordProvider {
     netlifyPayload: NetlifyPayload,
   ): Promise<number> {
     const discordPayload = DiscordFactory.createBotPayload(
-      this.discordApplicationId,
+      this.#discordApplicationId,
       deploymentStatus,
       netlifyPayload,
     );
 
-    const request = new Request(this.discordBotUrl, {
+    const request = new Request(this.#discordBotUrl, {
       method: "POST",
       body: JSON.stringify(discordPayload),
       headers: {
@@ -50,7 +46,7 @@ export class DiscordProvider {
       },
     });
 
-    this.logger.log("notify", {
+    this.#logger.log("notify", {
       discordPayload,
     });
 
