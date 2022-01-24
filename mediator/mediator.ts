@@ -1,118 +1,93 @@
-import {
-  LoggingProvider,
-  LoggingProviderInterface,
-} from "../providers/logging-provider.ts";
+import { LoggingProvider } from "../providers/logging-provider.ts";
 
-interface IRequest<TReturn> {
-  type(): TReturn;
-}
+type AnyType = any;
 
-export function Request<TResponse>(): new () => IRequest<TResponse> {
-  class RequestClass<TResponse> implements IRequest<TResponse> {
-    type(): TResponse {
-      throw new Error("Method not implemented.");
+export abstract class Request<TResponse = void> {
+  private static _requestTypeId: symbol;
+
+  static get requestTypeId() {
+    if (
+      !Object.getOwnPropertyDescriptor(this, "_requestTypeId") ||
+      this._requestTypeId == null
+    ) {
+      Object.defineProperty(this, "_requestTypeId", {
+        value: Symbol(`AsyncRequest-${this.name}`),
+      });
     }
+
+    return this._requestTypeId;
   }
 
-  return RequestClass;
+  type(): TResponse {
+    throw new Error("Method not implemented.");
+  }
 }
 
-type ResponseOf<TRequest> = TRequest extends IRequest<infer TResponse>
-  ? TResponse
+type Response<TRequest> = TRequest extends Request<infer TResponse> ? TResponse
   : never;
 
-type HandlerOf<TRequest> = (
+type Handler<TRequest extends Request> = (
   request: TRequest,
-) => Promise<ResponseOf<TRequest>>;
+) => Response<TRequest>;
 
-type ConstructorOf<TRequest> = { new (...args: any[]): TRequest };
-
-class RequestHandlerStore {
-  #requestHandlers: Record<string, (...args: any[]) => Promise<any>> = {};
-
-  #logger: LoggingProviderInterface;
-
-  constructor() {
-    this.#logger = LoggingProvider(this.constructor.name);
+type RequestConstructor<TRequest extends Request> =
+  & (new (
+    ...args: AnyType
+  ) => AnyType)
+  & {
+    prototype: TRequest;
   }
+  & {
+    requestTypeId: symbol;
+  };
 
-  add<TResponse>(
-    name: string,
-    handler: HandlerOf<TResponse>,
+export class Mediator {
+  #requestHandlers: Record<
+    symbol,
+    Handler<Request<AnyType>>
+  > = {};
+  #logger = LoggingProvider(this.constructor.name);
+
+  use<TRequest extends Request<TResponse>, TResponse>(
+    { name, requestTypeId }: RequestConstructor<TRequest>,
+    handler: Handler<TRequest>,
   ): void {
     try {
-      if (name in this.#requestHandlers) {
+      if (requestTypeId in this.#requestHandlers) {
         throw new Error(`Handler for ${name} already exists`);
       }
 
-      this.#requestHandlers[name] = handler;
+      this.#requestHandlers = {
+        ...this.#requestHandlers,
+        [requestTypeId]: handler as Handler<Request<AnyType>>,
+      };
     } catch (e) {
       this.#logger.error(e);
       throw e;
     }
   }
 
-  get<TRequest>(
-    name: string,
-  ): HandlerOf<TRequest> {
-    if (name in this.#requestHandlers) {
-      return this.#requestHandlers[name];
-    }
+  send<TRequest extends Request>(
+    request: TRequest,
+  ): Response<TRequest> {
+    const { constructor } = request;
+    const { name, requestTypeId } = isRequestConstructor<TRequest>(constructor)
+      ? constructor
+      : { name: undefined, requestTypeId: undefined };
 
-    throw new Error(`No handler found for request, ${name}`);
-  }
-}
-
-export class Mediator {
-  #requestHandlerStore: RequestHandlerStore = new RequestHandlerStore();
-
-  #logger: LoggingProviderInterface;
-
-  constructor() {
-    this.#logger = LoggingProvider(this.constructor.name);
-  }
-
-  use<TRequest>(
-    requestObj: ConstructorOf<TRequest>,
-    handler: HandlerOf<TRequest>,
-  ): void {
-    try {
-      this.#requestHandlerStore.add(requestObj.name, handler);
-    } catch (e) {
-      this.#logger.error(e);
-      throw e;
-    }
-  }
-
-  send<TReturn>(
-    request: IRequest<TReturn>,
-  ): Promise<TReturn> {
-    const { name } = request.constructor;
-
-    const handler = this.#requestHandlerStore.get<typeof request>(name);
-    if (handler == null) {
+    if (requestTypeId == null || !(requestTypeId in this.#requestHandlers)) {
       throw new Error(`No handler found for request, ${name}`);
     }
+
+    const handler = this.#requestHandlers[requestTypeId];
 
     return handler(request);
   }
 }
 
-/**
- * Example usage
- *
-
-    class Ping extends Request<string>() {
-      constructor(public message: string) {
-        super();
-      }
-    }
-
-    const mediator = new Mediator();
-    mediator.use(Ping, (request) => {
-    return Promise.resolve(request.message);
-    });
-
-    const response = await mediator.send(new Ping("Hello"));
-
- */
+function isRequestConstructor<TRequest extends Request>(
+  constructor: AnyType,
+): constructor is RequestConstructor<TRequest> {
+  return constructor.requestTypeId != null &&
+    typeof constructor.requestTypeId === "symbol";
+}
