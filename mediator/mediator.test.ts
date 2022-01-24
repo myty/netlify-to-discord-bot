@@ -1,28 +1,52 @@
 import {
   assertEquals,
   assertNotEquals,
+  assertRejects,
   assertThrows,
 } from "https://deno.land/std@0.122.0/testing/asserts.ts";
-import { Mediator, Request } from "./mediator.ts";
+import { Mediator, Notification, Request } from "./mediator.ts";
 
 Deno.test("Mediator", async (t) => {
   // Setup
   class TestClass1 extends Request<Promise<number>> {}
   class TestClass2 extends Request<Promise<number>> {}
   class TestClass3 extends Request {}
+  class UnregisteredRequest extends Request<number> {}
+  class UnregisteredPromiseRequest extends Request<Promise<number>> {}
+  class TestNotification1 extends Notification {}
+  class TestNotification2 extends Notification {}
+  class UnregisteredNotification extends Notification {}
   const mediator = new Mediator();
   const expected = 42;
 
-  await t.step("requestTypeId is unique for each inherited class", () => {
+  await t.step("requestTypeId is unique for each request class", () => {
     assertNotEquals(TestClass1.requestTypeId, TestClass2.requestTypeId);
   });
 
+  await t.step(
+    "notificationTypeId is unique for each notification class",
+    () => {
+      assertNotEquals(
+        TestNotification1.notificationTypeId,
+        TestNotification2.notificationTypeId,
+      );
+    },
+  );
+
   await t.step("can add handler for request type", () => {
-    mediator.use(TestClass1, () => Promise.resolve(expected));
+    mediator.request(TestClass1, () => Promise.resolve(expected));
+  });
+
+  await t.step("can add handler for notification type", () => {
+    mediator.notification(TestNotification1, () => Promise.resolve());
+  });
+
+  await t.step("can add multiple handlers for same notification type", () => {
+    mediator.notification(TestNotification1, () => Promise.resolve());
   });
 
   await t.step("can add handler with no response for request type", () => {
-    mediator.use(TestClass3, () => {});
+    mediator.request(TestClass3, () => {});
     mediator.send(new TestClass3());
   });
 
@@ -30,7 +54,7 @@ Deno.test("Mediator", async (t) => {
     "cannot add a request handler for the same type more than once",
     () => {
       assertThrows(() => {
-        mediator.use(TestClass1, () => Promise.resolve(expected));
+        mediator.request(TestClass1, () => Promise.resolve(expected));
       });
     },
   );
@@ -39,13 +63,28 @@ Deno.test("Mediator", async (t) => {
     assertEquals(await mediator.send(new TestClass1()), expected);
   });
 
+  await t.step("publish notification calls correct handlers", async () => {
+    await mediator.publish(new TestNotification1());
+  });
+
   await t.step(
     "send request has exception if there is no registered handler",
     () => {
-      assertThrows(() => {
-        class UnregisteredClass extends Request<number> {}
-        mediator.send(new UnregisteredClass());
-      });
+      assertThrows(() => mediator.send(new UnregisteredRequest()));
+    },
+  );
+
+  await t.step(
+    "send async request has exception if there is no registered handler",
+    () => {
+      assertRejects(() => mediator.send(new UnregisteredPromiseRequest()));
+    },
+  );
+
+  await t.step(
+    "publish notification has exception if there are no registered handlers",
+    () => {
+      assertRejects(() => mediator.publish(new UnregisteredNotification()));
     },
   );
 });
