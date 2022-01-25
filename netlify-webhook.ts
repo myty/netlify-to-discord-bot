@@ -1,11 +1,10 @@
-import { Application, Router } from "./deps.ts";
+import { Application, Mediator, Router } from "./deps.ts";
 import {
   DefaultLogger,
   LoggingProviderInterface,
 } from "./providers/logging-provider.ts";
 import { DiscordProvider } from "./providers/discord-provider.ts";
 import { NetlifyProvider } from "./providers/netlify/netlify-provider.ts";
-import { Mediator } from "./mediator/mediator.ts";
 import {
   SendNetlifyBuildNotificationRequest,
   SendNetlifyBuildNotificationRequestHandler,
@@ -29,7 +28,7 @@ export function serve(options?: ServeOptions): void {
     const netlifyProvider = new NetlifyProvider();
 
     const mediator = new Mediator();
-    mediator.use(
+    mediator.handle(
       SendNetlifyBuildNotificationRequest,
       SendNetlifyBuildNotificationRequestHandler({
         discordProvider,

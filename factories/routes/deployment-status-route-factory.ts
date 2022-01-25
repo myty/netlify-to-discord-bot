@@ -1,4 +1,4 @@
-import { Mediator } from "../../mediator/mediator.ts";
+import { Mediator } from "../../deps.ts";
 import { SendNetlifyBuildNotificationRequest } from "../../mediator/requests/send-netlify-build-notification-request.ts";
 import { routeFactory } from "./route-factory.ts";
 

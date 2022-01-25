@@ -1,4 +1,4 @@
-import { Request } from "../mediator.ts";
+import { Request } from "../../deps.ts";
 import { DiscordProvider } from "../../providers/discord-provider.ts";
 import { NetlifyPayload } from "../../providers/netlify/interfaces/netlify-payload.ts";
 import { NetlifyProvider } from "../../providers/netlify/netlify-provider.ts";
