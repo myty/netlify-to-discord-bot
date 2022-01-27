@@ -1,4 +1,4 @@
-import { Application, Mediator, Router } from "./deps.ts";
+import { Application, Mediator } from "./deps.ts";
 import {
   DefaultLogger,
   LoggingProviderInterface,
@@ -36,23 +36,11 @@ export function serve(options?: ServeOptions): void {
       }),
     );
 
-    const app = new Application();
-
-    app.addEventListener("error", (event) => {
-      logger.error(event.error);
-    });
-
-    const router = new Router();
-
-    router.post(
-      ...deploymentStatusRouteFactory({ mediator }),
-    );
-
-    app.use(router.routes());
-
     logger.log(`Listening on port ${port}`);
 
-    app.listen({ port });
+    new Application().get(...deploymentStatusRouteFactory({ mediator })).start({
+      port,
+    });
   } catch (error) {
     logger.error(error);
   }

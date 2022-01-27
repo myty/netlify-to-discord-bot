@@ -1,5 +1,6 @@
 import { Mediator } from "../../deps.ts";
 import { SendNetlifyBuildNotificationRequest } from "../../mediator/requests/send-netlify-build-notification-request.ts";
+import { NetlifyPayload } from "../../providers/netlify/interfaces/netlify-payload.ts";
 import { routeFactory } from "./route-factory.ts";
 
 interface DeploymentStatusRouteFactoryOptions {
@@ -12,20 +13,13 @@ export const deploymentStatusRouteFactory = routeFactory<
   "/deployments/:status",
   ({ mediator }) => {
     return async (ctx) => {
+      const payload = await ctx.body as NetlifyPayload;
       const request = new SendNetlifyBuildNotificationRequest(
         ctx.params.status,
-        async () => {
-          const { value: netlifyPayloadPromise } = ctx.request.body({
-            type: "json",
-          });
-
-          return await netlifyPayloadPromise;
-        },
+        payload,
       );
 
-      const response = await mediator.send(request);
-
-      ctx.response.status = response;
+      ctx.response.status = await mediator.send(request);
     };
   },
 );

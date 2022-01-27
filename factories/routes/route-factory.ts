@@ -1,4 +1,4 @@
-import { RouterMiddleware } from "https://deno.land/x/oak@v10.1.0/router.ts";
+import { HandlerFunc } from "../../deps.ts";
 import { RouteFactory } from "./types.ts";
 
 export function routeFactory<
@@ -6,7 +6,7 @@ export function routeFactory<
   TRoutePath extends string = string,
 >(
   path: TRoutePath,
-  middlewareFactory: (options: TFactoryOptions) => RouterMiddleware<TRoutePath>,
+  middlewareFactory: (options: TFactoryOptions) => HandlerFunc,
 ): RouteFactory<TRoutePath, TFactoryOptions> {
   return (options) => [path, middlewareFactory(options)];
 }

@@ -12,20 +12,16 @@ export class NetlifyProvider {
     this.logger = LoggingProvider(this.constructor.name);
   }
 
-  async parseWebhookPayload(
+  parseWebhookPayload(
     deploymentStatus: string,
-    payloadReader: () => Promise<NetlifyPayload>,
-  ): Promise<
-    {
-      deploymentStatus: NetlifyDeploymentStatus;
-      netlifyPayload: NetlifyPayload;
-    }
-  > {
+    netlifyPayload: NetlifyPayload,
+  ): {
+    deploymentStatus: NetlifyDeploymentStatus;
+    netlifyPayload: NetlifyPayload;
+  } {
     if (!isValidNetlifyDeploymentStatus(deploymentStatus)) {
       throw new Error(`Invalid deployment status: ${deploymentStatus}`);
     }
-
-    const netlifyPayload = await payloadReader();
 
     this.logger.log("Reveived webhook payload", {
       deploymentStatus,

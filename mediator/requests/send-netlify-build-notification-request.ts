@@ -7,7 +7,7 @@ export class SendNetlifyBuildNotificationRequest
   extends Request<Promise<number>> {
   constructor(
     public readonly deploymentStatus: string,
-    public readonly payloadReader: () => Promise<NetlifyPayload>,
+    public readonly payload: NetlifyPayload,
   ) {
     super();
   }
@@ -25,8 +25,8 @@ export function SendNetlifyBuildNotificationRequestHandler(
   return async (
     request: SendNetlifyBuildNotificationRequest,
   ): Promise<number> => {
-    const { deploymentStatus, netlifyPayload } = await netlifyProvider
-      .parseWebhookPayload(request.deploymentStatus, request.payloadReader);
+    const { deploymentStatus, netlifyPayload } = netlifyProvider
+      .parseWebhookPayload(request.deploymentStatus, request.payload);
 
     return await discordProvider.notify(
       deploymentStatus,
